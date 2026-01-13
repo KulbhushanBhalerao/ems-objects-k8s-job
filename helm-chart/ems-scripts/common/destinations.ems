@@ -2,7 +2,7 @@
 # Common Destinations (Queues & Topics)
 # Applicable for ALL environments
 # Define queues, topics (non-global) ONLY
-# No bridges (define those in bridges.ems)
+# No bridges (define those in bridges.bridge)
 ##########################################
 
 echo on

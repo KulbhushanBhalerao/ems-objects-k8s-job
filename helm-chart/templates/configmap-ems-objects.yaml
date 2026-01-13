@@ -15,9 +15,8 @@ data:
   # EXECUTION ORDER (alphabetical):
   # 1. Common destinations (.ems)
   # 2. Application destinations (.ems)
-  # 3. Common bridges (.ems)
-  # 4. Application bridges (.ems)
-  # 5. Environment-specific bridges (.bridge)
+  # 3. Common bridges (.bridge)
+  # 4. Application bridges (.bridge)
   # ============================================
   
   # Step 1: Common Destinations
@@ -29,13 +28,9 @@ data:
 {{ .Files.Get "ems-scripts/application/destinations.ems" | indent 4 }}
 
   # Step 3: Common Bridges
-  3.common.bridges.ems: |-
-{{ .Files.Get "ems-scripts/common/bridges.ems" | indent 4 }}
+  3.common.bridges.bridge: |-
+{{ .Files.Get "ems-scripts/common/bridges.bridge" | indent 4 }}
 
   # Step 4: Application Bridges
-  4.application.bridges.ems: |-
-{{ .Files.Get "ems-scripts/application/bridges.ems" | indent 4 }}
-
-  # Step 5: Environment-Specific Bridges (DEV)
-  5.dev.destinations.bridge: |-
-{{ .Files.Get "ems-scripts/application/dev_destinations.bridge" | indent 4 }}
+  4.application.bridges.bridge: |-
+{{ .Files.Get "ems-scripts/application/bridges.bridge" | indent 4 }}

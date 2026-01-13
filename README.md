@@ -14,11 +14,10 @@ This project provides a Kubernetes-based solution for creating TIBCO EMS objects
 ├── ems-scripts/
 │   ├── common/
 │   │   ├── destinations.ems           # Common queues/topics for all environments
-│   │   └── bridges.ems                # Common bridges for all environments
+│   │   └── bridges.bridge             # Common bridges for all environments
 │   └── application/
 │       ├── destinations.ems           # Application-specific destinations
-│       ├── bridges.ems                # Application-specific bridges
-│       └── dev_destinations.bridge    # Environment-specific bridges (dev)
+│       └── bridges.bridge             # Application-specific bridges
 ├── kubernetes/
 │   ├── configmap-ems-objects-standalone.yaml # ConfigMap for standalone kubectl deployment
 │   ├── job-ems-objects.yaml               # Kubernetes Job (standalone version)
@@ -76,7 +75,7 @@ docker push your-registry/ems-admin:1.0.0
 Edit the files in `ems-scripts/` directory to define your EMS objects:
 
 - Add queues/topics in `*.ems` files
-- Add bridges in `bridges.ems` or environment-specific `.bridge` files
+- Add bridges in `.bridge` files
 
 ### 3. Update Kubernetes Manifests
 
@@ -118,9 +117,8 @@ For standalone deployment without Helm:
 kubectl create configmap ems-objects-scripts \
   --from-file=1.common.destinations.ems=ems-scripts/common/destinations.ems \
   --from-file=2.application.destinations.ems=ems-scripts/application/destinations.ems \
-  --from-file=3.common.bridges.ems=ems-scripts/common/bridges.ems \
-  --from-file=4.application.bridges.ems=ems-scripts/application/bridges.ems \
-  --from-file=5.dev.destinations.bridge=ems-scripts/application/dev_destinations.bridge
+  --from-file=3.common.bridges.bridge=ems-scripts/common/bridges.bridge \
+  --from-file=4.application.bridges.bridge=ems-scripts/application/bridges.bridge
 
 # Create the secret
 kubectl create secret generic ems-admin-secret --from-literal=password=emspassword

@@ -17,9 +17,8 @@ data:
   # kubectl create configmap ems-objects-scripts \
   #   --from-file=1.common.destinations.ems=../ems-scripts/common/destinations.ems \
   #   --from-file=2.application.destinations.ems=../ems-scripts/application/destinations.ems \
-  #   --from-file=3.common.bridges.ems=../ems-scripts/common/bridges.ems \
-  #   --from-file=4.application.bridges.ems=../ems-scripts/application/bridges.ems \
-  #   --from-file=5.dev.destinations.bridge=../ems-scripts/application/dev_destinations.bridge \
+  #   --from-file=3.common.bridges.bridge=../ems-scripts/common/bridges.bridge \
+  #   --from-file=4.application.bridges.bridge=../ems-scripts/application/bridges.bridge \
   #   --dry-run=client -o yaml | kubectl apply -f -
   #
   # Or update individual files:
