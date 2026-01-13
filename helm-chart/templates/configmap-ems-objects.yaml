@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ems-objects-scripts
+  labels:
+    app: ems-admin
+    component: configuration
+  annotations:
+    description: "ConfigMap containing EMS object definition scripts (.ems and .bridge files)"
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-10"
+    "helm.sh/hook-delete-policy": before-hook-creation
+data:
+  # ============================================
+  # EXECUTION ORDER (alphabetical):
+  # 1. Common destinations (.ems)
+  # 2. Application destinations (.ems)
+  # 3. Common bridges (.ems)
+  # 4. Application bridges (.ems)
+  # 5. Environment-specific bridges (.bridge)
+  # ============================================
+  
+  # Step 1: Common Destinations
+  1.common.destinations.ems: |-
+{{ .Files.Get "ems-scripts/common/destinations.ems" | indent 4 }}
+
+  # Step 2: Application-Specific Destinations
+  2.application.destinations.ems: |-
+{{ .Files.Get "ems-scripts/application/destinations.ems" | indent 4 }}
+
+  # Step 3: Common Bridges
+  3.common.bridges.ems: |-
+{{ .Files.Get "ems-scripts/common/bridges.ems" | indent 4 }}
+
+  # Step 4: Application Bridges
+  4.application.bridges.ems: |-
+{{ .Files.Get "ems-scripts/application/bridges.ems" | indent 4 }}
+
+  # Step 5: Environment-Specific Bridges (DEV)
+  5.dev.destinations.bridge: |-
+{{ .Files.Get "ems-scripts/application/dev_destinations.bridge" | indent 4 }}

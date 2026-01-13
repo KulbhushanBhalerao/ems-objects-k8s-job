@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ems-objects-scripts
+  labels:
+    app: ems-admin
+    component: configuration
+  annotations:
+    description: "ConfigMap containing EMS object definition scripts (.ems and .bridge files)"
+data:
+  # ============================================
+  # STANDALONE VERSION - For use without Helm
+  # Files must be manually copied into this ConfigMap
+  # ============================================
+  # 
+  # To update this ConfigMap with your .ems and .bridge files, use:
+  # kubectl create configmap ems-objects-scripts \
+  #   --from-file=1.common.destinations.ems=../ems-scripts/common/destinations.ems \
+  #   --from-file=2.application.destinations.ems=../ems-scripts/application/destinations.ems \
+  #   --from-file=3.common.bridges.ems=../ems-scripts/common/bridges.ems \
+  #   --from-file=4.application.bridges.ems=../ems-scripts/application/bridges.ems \
+  #   --from-file=5.dev.destinations.bridge=../ems-scripts/application/dev_destinations.bridge \
+  #   --dry-run=client -o yaml | kubectl apply -f -
+  #
+  # Or update individual files:
+  # kubectl create configmap ems-objects-scripts \
+  #   --from-file=../ems-scripts/ \
+  #   --dry-run=client -o yaml | kubectl apply -f -

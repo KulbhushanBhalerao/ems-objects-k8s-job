@@ -1,0 +1,27 @@
+##########################################
+# Application-Specific Destinations
+# Define application-specific queues and topics
+##########################################
+
+echo on
+
+##########################################
+# APPLICATION QUEUES
+##########################################
+
+# Order processing queue
+create queue APP.ORDER.PROCESSING.Q.01
+setprop queue APP.ORDER.PROCESSING.Q.01 prefetch=10,failsafe,maxbytes=100MB
+create jndiname APP.ORDER.PROCESSING.Q.01 queue APP.ORDER.PROCESSING.Q.01
+
+##########################################
+# APPLICATION TOPICS
+##########################################
+
+# Order status topic
+create topic APP.ORDER.STATUS.T.01
+setprop topic APP.ORDER.STATUS.T.01 secure
+create jndiname APP.ORDER.STATUS.T.01 topic APP.ORDER.STATUS.T.01
+
+# Commit all changes
+commit

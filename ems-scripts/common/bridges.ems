@@ -1,0 +1,14 @@
+##########################################
+# Common Bridges
+# Applicable for ALL environments
+# Define bridges ONLY
+##########################################
+
+echo on
+
+# Bridge from events topic to processing queue
+# Useful for event-driven architectures
+create bridge source=topic:APP.EVENTS.T.01 target=queue:APP.INBOUND.Q.01 selector="EventType='CRITICAL'"
+
+# Commit all changes
+commit

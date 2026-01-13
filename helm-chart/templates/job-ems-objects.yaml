@@ -1,0 +1,122 @@
+{{- define "job-ems-objects-creation" -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-ems-objects-creation
+  labels:
+    app: ems-admin
+    component: job
+  annotations:
+    description: "Job to create TIBCO EMS objects (queues, topics, bridges)"
+    # Hash of ConfigMap content to detect changes - triggers job rerun on config changes
+    configmaphash: {{ include "configmap-ems-objects" . | sha256sum }}
+spec:
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 600
+  
+  template:
+    metadata:
+      name: job-ems-objects-creation
+      labels:
+        app: ems-admin
+        component: job
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      
+      restartPolicy: Never
+      
+      containers:
+      - name: ems-admin
+        image: {{ .Values.emsAdmin.image | default "ems-admin:1.0.0" }}
+        imagePullPolicy: IfNotPresent
+        
+        env:
+        - name: EMSSERVERNAME
+          value: {{ .Values.emsAdmin.serverName | default "emsserver-svc" | quote }}
+        - name: EMS_PORT
+          value: {{ .Values.emsAdmin.port | default "7222" | quote }}
+        - name: EMS_USER
+          value: {{ .Values.emsAdmin.user | default "admin" | quote }}
+        - name: EMS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.emsAdmin.passwordSecret | default "ems-admin-secret" }}
+              key: {{ .Values.emsAdmin.passwordKey | default "password" }}
+        
+        resources:
+          requests:
+            cpu: {{ .Values.emsAdmin.resources.requests.cpu | default "100m" | quote }}
+            memory: {{ .Values.emsAdmin.resources.requests.memory | default "256Mi" | quote }}
+          limits:
+            cpu: {{ .Values.emsAdmin.resources.limits.cpu | default "500m" | quote }}
+            memory: {{ .Values.emsAdmin.resources.limits.memory | default "512Mi" | quote }}
+        
+        volumeMounts:
+        - name: ems-scripts
+          mountPath: "/scripts/destination"
+          readOnly: true
+        
+        securityContext:
+          runAsUser: 2001
+          runAsGroup: 2001
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          capabilities:
+            drop:
+            - ALL
+      
+      volumes:
+      - name: ems-scripts
+        configMap:
+          name: ems-objects-scripts
+          defaultMode: 0444
+      
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end -}}
+
+{{/*
+============================================
+SMART JOB EXECUTION LOGIC
+Only runs the job when ConfigMap has changed
+============================================
+*/}}
+
+{{/* Calculate hash of the new, maybe changed configmap */}}
+{{- $newhash := include "configmap-ems-objects" . | sha256sum -}}
+
+{{/* Always run when we do an initial helm install */}}
+{{- if .Release.IsInstall }}
+  {{- include "job-ems-objects-creation" . }}
+
+{{/* Determine if we have to run during helm upgrade */}}
+{{- else }}
+  {{/* Check if a job already exists in kubernetes */}}
+  {{- $existingJob := lookup "batch/v1" "Job" .Release.Namespace "job-ems-objects-creation" }}
+  {{- if $existingJob }}
+    {{/* Get the current value of the hash of the configmap from kubernetes */}}
+    {{- $currenthash := "" }}
+    {{- if $existingJob.metadata.annotations }}
+      {{- $currenthash = $existingJob.metadata.annotations.configmaphash | default "" }}
+    {{- end }}
+    
+    {{/* Check if the hashes are different, in which case we run the job */}}
+    {{- if ne $currenthash $newhash }}
+      {{- include "job-ems-objects-creation" . }}
+    {{- end }}
+  {{/* If no job exists in kubernetes, we always run the job */}}
+  {{- else }}
+    {{- include "job-ems-objects-creation" . }}
+  {{- end }}
+{{- end }}

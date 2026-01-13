@@ -1,0 +1,54 @@
+# Default values for EMS Objects Creation Job
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# EMS Admin job configuration
+emsAdmin:
+  # Docker image for the EMS admin container
+  image: "ems-admin:1.0.0"
+  
+  # EMS server connection details
+  serverName: "emsserver-svc"
+  port: "7222"
+  user: "admin"
+  
+  # Secret configuration for EMS password
+  # Default EMS credentials are typically admin/emspassword
+  # Create the secret before deploying:
+  # kubectl create secret generic ems-admin-secret --from-literal=password=emspassword
+  passwordSecret: "ems-admin-secret"
+  passwordKey: "password"
+  
+  # Resource limits and requests
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+
+# Image pull secrets for private registries
+# Uncomment and configure if using a private Docker registry
+# imagePullSecrets:
+#   - name: registry-secret
+
+# Node affinity configuration
+# Uncomment and configure to control pod scheduling
+# affinity:
+#   nodeAffinity:
+#     requiredDuringSchedulingIgnoredDuringExecution:
+#       nodeSelectorTerms:
+#       - matchExpressions:
+#         - key: node-role
+#           operator: In
+#           values:
+#           - worker
+
+# Tolerations configuration
+# Uncomment and configure to allow pods on tainted nodes
+# tolerations:
+#   - key: "key1"
+#     operator: "Equal"
+#     value: "value1"
+#     effect: "NoSchedule"

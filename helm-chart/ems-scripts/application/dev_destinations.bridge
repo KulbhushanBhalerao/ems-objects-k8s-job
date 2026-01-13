@@ -1,0 +1,14 @@
+##########################################
+# Development Environment Specific Bridges
+# Define global topics and bridges specific to DEV environment
+##########################################
+
+echo on
+
+# Create dev-specific debug queue (only in dev)
+create queue APP.DEV.DEBUG.Q.01
+setprop queue APP.DEV.DEBUG.Q.01 maxbytes=10MB
+create jndiname APP.DEV.DEBUG.Q.01 queue APP.DEV.DEBUG.Q.01
+
+# Commit all changes
+commit

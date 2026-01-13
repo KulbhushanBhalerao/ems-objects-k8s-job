@@ -1,0 +1,12 @@
+##########################################
+# Application-Specific Bridges
+# Define bridges between application destinations
+##########################################
+
+echo on
+
+# Bridge order status topic to processing queue
+create bridge source=topic:APP.ORDER.STATUS.T.01 target=queue:APP.ORDER.PROCESSING.Q.01
+
+# Commit all changes
+commit

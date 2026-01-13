@@ -1,0 +1,110 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-ems-objects-creation
+  labels:
+    app: ems-admin
+    component: job
+    environment: dev
+  annotations:
+    description: "Job to create TIBCO EMS objects (queues, topics, bridges)"
+    # Helm hook annotations (uncomment if using with Helm)
+    # "helm.sh/hook": pre-install,pre-upgrade
+    # "helm.sh/hook-weight": "-5"
+    # "helm.sh/hook-delete-policy": before-hook-creation
+    # configmaphash: {{ include (print $.Template.BasePath "/configmap-ems-objects.yaml") . | sha256sum }}
+spec:
+  # Number of times to retry the job if it fails
+  backoffLimit: 3
+  
+  # Time to keep the job after completion (for log inspection)
+  ttlSecondsAfterFinished: 600
+  
+  template:
+    metadata:
+      name: job-ems-objects-creation
+      labels:
+        app: ems-admin
+        component: job
+        environment: dev
+    spec:
+      # Service account (if needed for RBAC)
+      # serviceAccountName: ems-admin-sa
+      
+      # Image pull secrets (if using private registry)
+      # imagePullSecrets:
+      #   - name: registry-secret
+      
+      restartPolicy: Never
+      
+      containers:
+      - name: ems-admin
+        # Update this to your container registry and image tag
+        image: ems-admin:1.0.0
+        imagePullPolicy: IfNotPresent
+        
+        # Environment variables
+        env:
+        - name: EMSSERVERNAME
+          value: "emsserver-svc"  # Update to your EMS server service name
+        - name: EMS_PORT
+          value: "7222"
+        - name: EMS_USER
+          value: "admin"
+        # Uncomment to set password via secret
+        # - name: EMS_PASSWORD
+        #   valueFrom:
+        #     secretKeyRef:
+        #       name: ems-credentials
+        #       key: password
+        
+        # Resource limits and requests
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+        
+        # Volume mounts
+        volumeMounts:
+        - name: ems-scripts
+          mountPath: "/scripts/destination"
+          readOnly: true
+        
+        # Security context
+        securityContext:
+          runAsUser: 2001
+          runAsGroup: 2001
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          capabilities:
+            drop:
+            - ALL
+      
+      # Volumes
+      volumes:
+      - name: ems-scripts
+        configMap:
+          name: ems-objects-scripts
+          defaultMode: 0444  # Read-only
+      
+      # Node affinity (optional)
+      # affinity:
+      #   nodeAffinity:
+      #     requiredDuringSchedulingIgnoredDuringExecution:
+      #       nodeSelectorTerms:
+      #       - matchExpressions:
+      #         - key: node-role
+      #           operator: In
+      #           values:
+      #           - worker
+      
+      # Tolerations (optional)
+      # tolerations:
+      # - key: "dedicated"
+      #   operator: "Equal"
+      #   value: "ems"
+      #   effect: "NoSchedule"
